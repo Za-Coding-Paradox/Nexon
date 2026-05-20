@@ -4,7 +4,7 @@ use std::collections::{HashMap, VecDeque};
 use strum::IntoEnumIterator;
 use strum_macros::EnumIter;
 
-use crate::block::transactions::Transaction;
+use crate::block::transaction::Transaction;
 use crate::utils::time::currentTime;
 
 #[derive(EnumIter, Hash, Eq, PartialEq, PartialOrd, Ord, Clone, Debug)]

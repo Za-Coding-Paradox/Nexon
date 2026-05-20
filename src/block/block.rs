@@ -1,4 +1,4 @@
-use crate::block::transactions::Transaction;
+use crate::block::transaction::Transaction;
 
 #[derive(Clone, Debug)]
 pub struct BlockHeader {
