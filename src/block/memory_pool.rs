@@ -63,7 +63,6 @@ impl MemPool {
     pub fn new(capacity: usize, boostRate: u64) -> Self {
         let mut memPoolQueues: HashMap<MemPoolTier, VecDeque<MemPoolEntry>> = HashMap::new();
 
-        // initialise every tier upfront so get() never returns None
         for tier in MemPoolTier::iter() {
             memPoolQueues.insert(tier, VecDeque::new());
         }
@@ -90,13 +89,11 @@ impl MemPool {
             return false;
         }
 
-        // age before evaluating capacity so eviction is always fair
         self.ageMemPoolEntries();
 
-        // evict if at capacity
-        if self.transactions.len() >= self.capacity {
+        while self.transactions.len() >= self.capacity {
             if !self.evictLowestPriority() {
-                return false; // full, nothing evictable
+                return false; 
             }
         }
 
@@ -111,7 +108,7 @@ impl MemPool {
 
         self.memPoolQueues
             .get_mut(&tier)
-            .unwrap()           // safe — all tiers initialised in new()
+            .unwrap()           
             .push_back(entry);
 
         self.transactions.insert(txId, tx);
@@ -126,12 +123,7 @@ impl MemPool {
 
         let mut result: Vec<Transaction> = Vec::with_capacity(count);
 
-        for tier in [
-            MemPoolTier::High,
-            MemPoolTier::Medium,
-            MemPoolTier::Low,
-            MemPoolTier::Dust,
-        ] {
+        for tier in MemPoolTier::iter() {
             if result.len() >= count {
                 break;
             }
@@ -145,7 +137,7 @@ impl MemPool {
                             result.push(tx);
                         }
                     }
-                    None => break, // tier exhausted, move to next
+                    None => break, 
                 }
             }
         }
@@ -159,10 +151,7 @@ impl MemPool {
     pub fn ageMemPoolEntries(&mut self) {
         let now = currentTime();
 
-        // process bottom-up — Dust first, High never promotes
-        let tiers = [MemPoolTier::Dust, MemPoolTier::Low, MemPoolTier::Medium];
-
-        for tier in tiers {
+        for tier in MemPoolTier::iter() {
             let toPromote = self.collectPromotableEntries(&tier, now);
 
             if !toPromote.is_empty() {
@@ -175,10 +164,6 @@ impl MemPool {
     pub fn getEntriesForTier(&self, tier: &MemPoolTier) -> Option<&VecDeque<MemPoolEntry>> {
         self.memPoolQueues.get(tier)
     }
-
-    // ----------------------------------------------------------------
-    // Private helpers
-    // ----------------------------------------------------------------
 
     /// Calculate a priority score for an entry.
     /// Score grows over time — higher fee and older age both increase it.
@@ -205,9 +190,9 @@ impl MemPool {
 
                 if newTier > entry.currentTier {
                     toPromote.push(entry.clone());
-                    false   // remove from current tier
+                    false   
                 } else {
-                    true    // keep in current tier
+                    true    
                 }
             });
         }
@@ -229,12 +214,7 @@ impl MemPool {
     /// Evict the oldest entry from the lowest non-empty tier.
     /// Returns true if something was evicted, false if mempool is empty.
     fn evictLowestPriority(&mut self) -> bool {
-        for tier in [
-            MemPoolTier::Dust,
-            MemPoolTier::Low,
-            MemPoolTier::Medium,
-            MemPoolTier::High,
-        ] {
+        for tier in MemPoolTier::iter() {
             if let Some(queue) = self.memPoolQueues.get_mut(&tier) {
                 if let Some(entry) = queue.pop_front() {
                     self.transactions.remove(&entry.transactionId);
