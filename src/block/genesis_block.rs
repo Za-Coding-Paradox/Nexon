@@ -1,15 +1,17 @@
-fn create_genesis_block() -> Block {
+use crate::block::block::{Block, BlockHeader, BlockBody};
+
+pub fn createGenesisBlock() -> Block {
     Block {
         header: BlockHeader {
             index: 0,
-            previous_hash: [0u8; 32],  // all zeros, nothing before it
-            merkle_root: [0u8; 32],    // no transactions
-            timestamp: 1716201600,     // hardcoded moment in time
-            difficulty: 1,             // very easy, no real mining needed
-            nonce: 0,                  // not brute forced
+            previousHash: [0u8; 32],  // all zeros, nothing before it
+            merkleRoot: [0u8; 32],    // no transactions
+            timestamp: 1_716_201_600,// hardcoded moment in time — Nexon epoch
+            difficulty: 1,            // trivial difficulty, genesis is not mined
+            nonce: 0,                 // not brute forced
         },
         body: BlockBody {
-            transactions: vec![],      // empty, or one founder transaction
-        }
+            transactions: vec![],     // empty — no founder allocation yet
+        },
     }
 }

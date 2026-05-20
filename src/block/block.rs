@@ -1,24 +1,22 @@
-struct BlockHeader {
-    index: u64,
-    previous_hash: [u8; 32], // SHA-256 is always 32 bytes
-    merkle_root: [u8; 32],    
-    timestamp: u64,
-    difficulty: u32,
-    nonce: u64,
+use crate::block::transactions::Transaction;
+
+#[derive(Clone, Debug)]
+pub struct BlockHeader {
+    pub index: u64,
+    pub previousHash: [u8; 32],   // SHA-256 is always 32 bytes
+    pub merkleRoot: [u8; 32],
+    pub timestamp: u64,
+    pub difficulty: u32,
+    pub nonce: u64,
 }
 
-struct Transaction {
-    sender: [u8; 33],        // public signature key is always 33 bytes 
-    receiver: [u8; 33],
-    amount: u64,
-    signature: [u8; 64],       
+#[derive(Clone, Debug)]
+pub struct BlockBody {
+    pub transactions: Vec<Transaction>,
 }
 
-struct BlockBody {
-    transactions: Vec<Transaction>,   
-}
-
-struct Block {
-    header: BlockHeader,
-    body: BlockBody,
+#[derive(Clone, Debug)]
+pub struct Block {
+    pub header: BlockHeader,
+    pub body: BlockBody,
 }
